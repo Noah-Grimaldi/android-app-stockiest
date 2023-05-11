@@ -9,15 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.TextView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,31 +23,36 @@ import java.util.concurrent.Executors;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class StockiestService extends Service {
 
+    static List<String> tickerBeats = new ArrayList<String>();
     private static class WebScrapeTask extends AsyncTask<Void, Void, Void> {
-
         private final Executor executor;
+        private final Context context;
 
-        public WebScrapeTask() {
+        public WebScrapeTask(Context context) {
             this.executor = Executors.newSingleThreadExecutor();
+            this.context = context;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             executor.execute(() -> {
                 try {
+                    Intent intent = new Intent("new-textview-event");
+                    intent.putExtra("message", "Let's see if it works.");
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     Document doc = Jsoup.connect("https://www.earningswhispers.com/calendar").get();
                     String tickers = doc.getElementsByClass("ticker").text();
                     List<String> tickerList = new ArrayList<String>(Arrays.asList(tickers.split(" ")));
+
                     for (String i : tickerList) {
                         String tickerClass = String.format("T-%s", i);
                         String tickerID = String.valueOf(doc.getElementById(tickerClass));
                         if (tickerID.contains("class=\"actual green") && tickerID.contains("class=\"revactual green")) {
-                            System.out.println(i); //Check if notification exists, and if it does just continue if it doesn't create a new notification
-//                            TextView newTextView = new TextView();
-//                            newTextView.setText("New Text");
+                            tickerBeats.add(i);
                         }
                     }
                 } catch (IOException e) {
@@ -61,6 +62,9 @@ public class StockiestService extends Service {
 
             return null;
         }
+    }
+    public static List<String> getTickerBeats() {
+        return tickerBeats;
     }
 
     public static final String CHANNEL_ID = "stockiest_service_channel";
@@ -96,7 +100,7 @@ public class StockiestService extends Service {
 
         startForeground(1, notification);
 
-        new WebScrapeTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new WebScrapeTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         // Return START_STICKY here to restart the service if the system kills it
         return START_STICKY;

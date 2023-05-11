@@ -22,12 +22,21 @@ import android.widget.Switch;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStore;
+import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.stockiest.databinding.ActivityMainBinding;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Notification permission denied.", Toast.LENGTH_SHORT).show();
                 }
             });
+
+    private Switch newsSwitch;
+    private Switch earningsSwitch;
+    private SharedPreferences prefs;
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
@@ -76,14 +89,13 @@ public class MainActivity extends AppCompatActivity {
             pushNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
         }
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch newsSwitch = findViewById(R.id.switch1);
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch earningsSwitch = findViewById(R.id.switch2);
-        SharedPreferences prefs = getSharedPreferences("myPrefs", MODE_PRIVATE);
+        newsSwitch = findViewById(R.id.switch1);
+        earningsSwitch = findViewById(R.id.switch2);
+        prefs = getSharedPreferences("myPrefs", MODE_PRIVATE);
 
-        // Read the saved switch state from SharedPreferences
+        // Set the initial switch state based on the saved preferences
         boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
         boolean isEarningsSwitchOn = prefs.getBoolean("earningsSwitchOn", false);
-
         newsSwitch.setChecked(isNewsSwitchOn);
         newsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -129,4 +141,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    CompoundButton.OnCheckedChangeListener switchListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            // Save the new switch state to SharedPreferences
+            SharedPreferences.Editor editor = prefs.edit();
+            if (buttonView == newsSwitch) {
+                editor.putBoolean("newsSwitchOn", isChecked);
+            } else if (buttonView == earningsSwitch) {
+                editor.putBoolean("earningsSwitchOn", isChecked);
+            }
+            editor.apply();
+
+            // Start or stop the service based on the switch state
+            Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
+            if (isChecked) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
+                } else {
+                    startService(serviceIntent);
+                }
+            } else {
+                stopService(serviceIntent);
+            }
+        }
+    };
 }
+
+
