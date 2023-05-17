@@ -26,48 +26,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class StockiestService extends Service {
+    private List<String> tickerBeats = new ArrayList<>();
+    public static final String CHANNEL_ID = "stockiest_service_channel";
 
-    static List<String> tickerBeats = new ArrayList<String>();
-    private static class WebScrapeTask extends AsyncTask<Void, Void, Void> {
-        private final Executor executor;
-        private final Context context;
-
-        public WebScrapeTask(Context context) {
-            this.executor = Executors.newSingleThreadExecutor();
-            this.context = context;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            executor.execute(() -> {
-                try {
-                    Intent intent = new Intent("new-textview-event");
-                    intent.putExtra("message", "Let's see if it works.");
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                    Document doc = Jsoup.connect("https://www.earningswhispers.com/calendar").get();
-                    String tickers = doc.getElementsByClass("ticker").text();
-                    List<String> tickerList = new ArrayList<String>(Arrays.asList(tickers.split(" ")));
-
-                    for (String i : tickerList) {
-                        String tickerClass = String.format("T-%s", i);
-                        String tickerID = String.valueOf(doc.getElementById(tickerClass));
-                        if (tickerID.contains("class=\"actual green") && tickerID.contains("class=\"revactual green")) {
-                            tickerBeats.add(i);
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            return null;
-        }
-    }
-    public static List<String> getTickerBeats() {
+    public List<String> getTickerBeats() {
         return tickerBeats;
     }
-
-    public static final String CHANNEL_ID = "stockiest_service_channel";
 
     @Override
     public void onCreate() {
@@ -115,5 +79,41 @@ public class StockiestService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    private class WebScrapeTask extends AsyncTask<Void, Void, Void> {
+        private final Executor executor;
+        private final Context context;
+
+        public WebScrapeTask(Context context) {
+            this.executor = Executors.newSingleThreadExecutor();
+            this.context = context;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            executor.execute(() -> {
+                try {
+                    Intent intent = new Intent("new-textview-event");
+                    intent.putExtra("message", "Let's see if it works.");
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    Document doc = Jsoup.connect("https://www.earningswhispers.com/calendar").get();
+                    String tickers = doc.getElementsByClass("ticker").text();
+                    List<String> tickerList = new ArrayList<>(Arrays.asList(tickers.split(" ")));
+
+                    for (String i : tickerList) {
+                        String tickerClass = String.format("T-%s", i);
+                        String tickerID = String.valueOf(doc.getElementById(tickerClass));
+                        if (tickerID.contains("class=\"actual green") && tickerID.contains("class=\"revactual green")) {
+                            tickerBeats.add(i);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            return null;
+        }
     }
 }

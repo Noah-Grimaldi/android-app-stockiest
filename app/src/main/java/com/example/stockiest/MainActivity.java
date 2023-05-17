@@ -46,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private Switch newsSwitch;
     private Switch earningsSwitch;
     private SharedPreferences prefs;
+    public static final String CHANNEL_ID = "stockiest_service_channel";
+    public static final String CHANNEL_NAME = "My Background Service";
+
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
@@ -57,29 +60,20 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 0);
         }
 
-        com.example.stockiest.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        // no clue what you had going on
+        configCrap();
 
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.navView, navController);
+        // creates notification channel
+        createNotificationChannel();
 
-        // Create the notification channel for devices running Android 8.0 or higher
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("my_channel_id", "My Channel", NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("My Notification Channel");
-            channel.enableLights(true);
-            channel.setLightColor(Color.BLUE);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+        // create switches and their event handlers
+        setupSwitches();
+    }
 
+    /**
+     * Initiates switches
+     */
+    private void setupSwitches() {
         newsSwitch = findViewById(R.id.switch1);
         earningsSwitch = findViewById(R.id.switch2);
         prefs = getSharedPreferences("myPrefs", MODE_PRIVATE);
@@ -109,6 +103,42 @@ public class MainActivity extends AppCompatActivity {
             Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
             serviceHelper(isChecked, serviceIntent);
         });
+    }
+
+    /**
+     * Sets up items (?)
+     */
+    private void configCrap() {
+        com.example.stockiest.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        BottomNavigationView navView = findViewById(R.id.nav_view);
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
+                .build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        NavigationUI.setupWithNavController(binding.navView, navController);
+    }
+
+    /**
+     *  Creates a global notification channel
+     */
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Stockiest notification channel");
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     /**

@@ -24,15 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationsFragment extends Fragment {
-
     private FragmentNotificationsBinding binding;
-
-    List<String> tickerBeatList = StockiestService.getTickerBeats();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+        StockiestService stockiestService = new StockiestService();
+        List<String> tickerBeatList = stockiestService.getTickerBeats();
 
         if (tickerBeatList != null && !tickerBeatList.isEmpty()) {
             List<String> testing = new ArrayList<>(tickerBeatList.subList(0, 3));
