@@ -1,5 +1,7 @@
 package com.example.stockiest.ui.home;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.stockiest.MainActivity;
 import com.example.stockiest.R;
 import com.example.stockiest.databinding.FragmentHomeBinding;
 
@@ -28,7 +31,7 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         newsSwitch = binding.switch1;
-        SharedPreferences prefs = getActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+        SharedPreferences prefs = getActivity().getSharedPreferences("myPrefs", MODE_PRIVATE);
         boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
         newsSwitch.setChecked(isNewsSwitchOn);
         newsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -52,9 +55,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println("RESUMING?!");
-        SharedPreferences prefs = getActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
-        newsSwitch.setChecked(isNewsSwitchOn);
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null) {
+            SharedPreferences prefs = getActivity().getSharedPreferences("myPrefs", MODE_PRIVATE);
+            boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
+            newsSwitch.setChecked(isNewsSwitchOn);
+            mainActivity.setupSwitches();
+        }
+        else throw new NullPointerException("main is null");
     }
 }

@@ -15,6 +15,7 @@
         android:theme="@style/Theme.Stockiest"
         tools:targetApi="31">
         <service android:name=".StockiestService" android:foregroundServiceType="dataSync" />
+        <service android:name=".StockQueryService" android:foregroundServiceType="dataSync"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

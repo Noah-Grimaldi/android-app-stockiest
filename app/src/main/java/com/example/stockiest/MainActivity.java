@@ -1,59 +1,72 @@
 package com.example.stockiest;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
+import android.os.IBinder;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStore;
-import androidx.navigation.NavBackStackEntry;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.stockiest.databinding.ActivityMainBinding;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 public class MainActivity extends AppCompatActivity {
-    private Switch newsSwitch;
-    private Switch earningsSwitch;
-    private SharedPreferences prefs;
     public static final String CHANNEL_ID = "stockiest_service_channel";
     public static final String CHANNEL_NAME = "My Background Service";
+    private StockQueryService stockQueryService;
+    private boolean isServiceBound = false;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // Service connected
+            StockQueryService.StockQueryServiceBinder binder = (StockQueryService.StockQueryServiceBinder) service;
+            stockQueryService = binder.getService();
+            isServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // Service disconnected
+            isServiceBound = false;
+            stockQueryService = null;
+        }
+    };
 
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Bind service
+        Intent serviceIntent = new Intent(this, StockQueryService.class);
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        startService(serviceIntent);
 
         // Launch the notification permission request if it hasn't been granted
         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -73,35 +86,45 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Initiates switches
      */
-    private void setupSwitches() {
-        newsSwitch = findViewById(R.id.switch1);
-        earningsSwitch = findViewById(R.id.switch2);
-        prefs = getSharedPreferences("myPrefs", MODE_PRIVATE);
+    public void setupSwitches() {
+        Switch newsSwitch = findViewById(R.id.switch1);
+        Switch earningsSwitch = findViewById(R.id.switch2);
+
+        SharedPreferences prefs = getSharedPreferences("myPrefs", MODE_PRIVATE);
 
         // Set the initial switch state based on the saved preferences
         boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
         boolean isEarningsSwitchOn = prefs.getBoolean("earningsSwitchOn", false);
 
         newsSwitch.setChecked(isNewsSwitchOn);
+
         newsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Save the new switch state to SharedPreferences
-            SharedPreferences.Editor editor = prefs.edit();
+            SharedPreferences prefsLocal = getSharedPreferences("myPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefsLocal.edit();
             editor.putBoolean("newsSwitchOn", isChecked);
             editor.apply();
 
-            Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
-            serviceHelper(isChecked, serviceIntent);
+            if (isChecked) {
+                queryStockSite();
+            }
+            else {
+                stopQuery();
+            }
         });
 
         earningsSwitch.setChecked(isEarningsSwitchOn);
         earningsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Save the new switch state to SharedPreferences
-            SharedPreferences.Editor editor = prefs.edit();
+            SharedPreferences prefsLocal = getSharedPreferences("myPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefsLocal.edit();
             editor.putBoolean("earningsSwitchOn", isChecked);
             editor.apply();
 
-            Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
-            serviceHelper(isChecked, serviceIntent);
+            if (isChecked) {
+                queryStockSite();
+            }
+            else {
+                stopQuery();
+            }
         });
     }
 
@@ -130,6 +153,9 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription("Stockiest notification channel");
+            channel.enableLights(true);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            channel.setLightColor(Color.BLUE);
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel);
@@ -139,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unbindService(serviceConnection);
     }
 
     /**
@@ -168,20 +195,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Method to reduce repetitive code
-     *
-     * @param isChecked Boolean representing the state of the given switch
-     * @param serviceIntent Intent Object meant to be started or stopped
+     * Helper to start querying website
      */
-    private void serviceHelper(boolean isChecked, Intent serviceIntent) {
-        if (isChecked) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent);
-            } else {
-                startService(serviceIntent);
-            }
-        } else {
-            stopService(serviceIntent);
+    public void queryStockSite() {
+        if (isServiceBound && stockQueryService != null && !stockQueryService.getRunning()) {
+            stockQueryService.startWebsiteQuery();
+        }
+    }
+
+    /**
+     * Helper to stop querying
+     */
+    public void stopQuery() {
+        if (isServiceBound && stockQueryService != null && stockQueryService.getRunning()) {
+            stockQueryService.stopWebsiteQuery();
         }
     }
 }
