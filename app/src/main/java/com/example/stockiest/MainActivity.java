@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         // Set the initial switch state based on the saved preferences
         boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
         boolean isEarningsSwitchOn = prefs.getBoolean("earningsSwitchOn", false);
+
         newsSwitch.setChecked(isNewsSwitchOn);
         newsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -105,16 +106,17 @@ public class MainActivity extends AppCompatActivity {
                 editor.putBoolean("newsSwitchOn", isChecked);
                 editor.apply();
 
+                Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
+
                 if (isChecked) {
                     System.out.println("it's checked! Check to see if this printed!");
-                    Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         startForegroundService(serviceIntent);
                     } else {
                         startService(serviceIntent);
                     }
                 } else {
-                    Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
                     stopService(serviceIntent);
                 }
             }
