@@ -52,6 +52,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        System.out.println("RESUMING?!");
         SharedPreferences prefs = getActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
         boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
         newsSwitch.setChecked(isNewsSwitchOn);

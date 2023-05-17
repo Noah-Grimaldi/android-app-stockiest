@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
 
                 if (isChecked) {
+                    System.out.println("it's checked! Check to see if this printed!");
                     Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         startForegroundService(serviceIntent);
