@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
 
             Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
-
             serviceHelper(isChecked, serviceIntent);
         });
 
@@ -108,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
 
             Intent serviceIntent = new Intent(MainActivity.this, StockiestService.class);
-
             serviceHelper(isChecked, serviceIntent);
         });
     }
@@ -117,8 +115,7 @@ public class MainActivity extends AppCompatActivity {
      * Callback to handle result of user accepting or denying
      * notification permissions
      *
-     * @param requestCode The request code passed in {@link #requestPermissions(
-     * android.app.Activity, String[], int)}
+     * @param requestCode The request code passed in
      * @param permissions The requested permissions. Never null.
      * @param grantResults The grant results for the corresponding permissions
      *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
