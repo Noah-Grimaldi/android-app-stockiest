@@ -22,7 +22,7 @@ import java.util.TimerTask;
 
 public class StockQueryService extends Service {
     private Timer timer;
-    private List<String> tickerBeats = new ArrayList<>();
+    private static List<String> tickerBeats = new ArrayList<>();
     private boolean isRunning = false;
     public static final String CHANNEL_ID = "stockiest_service_channel";
 
@@ -64,6 +64,7 @@ public class StockQueryService extends Service {
                 .build();
 
         startForeground(1, notification);
+        System.out.println("sent notif");
 
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -94,7 +95,7 @@ public class StockQueryService extends Service {
         stopForeground(true);
     }
 
-    public List<String> getTickerBeats() {
+    public static List<String> getTickerBeats() {
         return tickerBeats;
     }
 
