@@ -33,26 +33,23 @@ public class StockQueryService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // BAD WORKAROUND - BUT IT WORKS FOR NOW
+        // FIX IN FUTURE
+        sendNotification();
+        stopForeground(true);
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //stopWebsiteQuery();
     }
 
     public boolean getRunning() {
         return isRunning;
     }
 
-    public void setRunning(boolean running) {
-        isRunning = running;
-    }
-
-    public void startWebsiteQuery() {
-        isRunning = true;
-        timer = new Timer();
+    public void sendNotification() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
@@ -64,8 +61,14 @@ public class StockQueryService extends Service {
                 .build();
 
         startForeground(1, notification);
-        System.out.println("sent notif");
+    }
 
+    public void startWebsiteQuery() {
+        isRunning = true;
+        timer = new Timer();
+
+        sendNotification();
+        System.out.println("sent notif");
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {

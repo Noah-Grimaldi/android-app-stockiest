@@ -24,26 +24,10 @@ import java.util.Objects;
 
 public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
-    private Switch newsSwitch;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        newsSwitch = binding.switch1;
-        SharedPreferences prefs = getActivity().getSharedPreferences("myPrefs", MODE_PRIVATE);
-        boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
-        newsSwitch.setChecked(isNewsSwitchOn);
-        newsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putBoolean("newsSwitchOn", isChecked);
-                editor.apply();
-            }
-        });
-
-        return root;
+        return binding.getRoot();
     }
 
     @Override
@@ -56,12 +40,7 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            SharedPreferences prefs = getActivity().getSharedPreferences("myPrefs", MODE_PRIVATE);
-            boolean isNewsSwitchOn = prefs.getBoolean("newsSwitchOn", false);
-            newsSwitch.setChecked(isNewsSwitchOn);
-            mainActivity.setupSwitches();
-        }
+        if (mainActivity != null) mainActivity.setupSwitches();
         else throw new NullPointerException("main is null");
     }
 }
