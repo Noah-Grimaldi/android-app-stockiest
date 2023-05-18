@@ -33,10 +33,6 @@ public class StockQueryService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // BAD WORKAROUND - BUT IT WORKS FOR NOW
-        // FIX IN FUTURE
-        sendNotification();
-        stopForeground(true);
         return START_STICKY;
     }
 
@@ -89,7 +85,7 @@ public class StockQueryService extends Service {
                     e.printStackTrace();
                 }
             }
-        }, 0, 5000); // Delay of 0 milliseconds and repeat every 5 seconds
+        }, 0, 3000); // Delay of 0 milliseconds and repeat every 5 seconds
     }
 
     public void stopWebsiteQuery() {
