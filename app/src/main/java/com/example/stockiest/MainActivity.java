@@ -96,10 +96,10 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
 
             if (isChecked) {
-                queryStockSite();
+                queryNews();
             }
             else {
-                stopQuery();
+                stopNewsQuery();
             }
         });
 
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
+                R.id.navigation_home, R.id.navigation_notifications)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -188,8 +188,13 @@ public class MainActivity extends AppCompatActivity {
      * Helper to start querying website
      */
     public void queryStockSite() {
-        if (isServiceBound && stockQueryService != null && !stockQueryService.getRunning()) {
+        if (isServiceBound && stockQueryService != null && !stockQueryService.getQueryRunning()) {
             stockQueryService.startWebsiteQuery();
+        }
+    }
+    public void queryNews() {
+        if (isServiceBound && stockQueryService != null && !stockQueryService.getNewsRunning()) {
+            stockQueryService.startStockNewsQuery();
         }
     }
 
@@ -197,8 +202,13 @@ public class MainActivity extends AppCompatActivity {
      * Helper to stop querying
      */
     public void stopQuery() {
-        if (isServiceBound && stockQueryService != null && stockQueryService.getRunning()) {
+        if (isServiceBound && stockQueryService != null && stockQueryService.getQueryRunning()) {
             stockQueryService.stopWebsiteQuery();
+        }
+    }
+    public void stopNewsQuery() {
+        if (isServiceBound && stockQueryService != null && stockQueryService.getNewsRunning()) {
+            stockQueryService.stopStockNewsQuery();
         }
     }
 }

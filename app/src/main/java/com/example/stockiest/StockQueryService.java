@@ -6,14 +6,22 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,9 +29,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class StockQueryService extends Service {
-    private Timer timer;
+    private Timer queryTimer;
+    private Timer newsTimer;
     private static List<String> tickerBeats = new ArrayList<>();
-    private boolean isRunning = false;
+    private boolean isQueryRunning = false;
+    private boolean isNewsRunning = false;
+    private final String[] keywordSetup = {"phase clinical trial", "merge", " ipo ", "acquisition","nasdaq", "cancer", "cells", "partnership", "equity financing"," deal ","fda approval"," trial", "eps exceeded","contract award", "heart monitor", "pardon", "collaboration", "receives", "acquire", "funding recipients", "agreement", "alliance", "layoff"};
+    private final List<String> newsKeywords = Arrays.asList(keywordSetup);
+    private final CharSequence newsKeywordsSequence = TextUtils.join(", ", newsKeywords);
+    List<String> seen = new ArrayList<>();
     public static final String CHANNEL_ID = "stockiest_service_channel";
 
     @Override
@@ -41,8 +55,12 @@ public class StockQueryService extends Service {
         super.onDestroy();
     }
 
-    public boolean getRunning() {
-        return isRunning;
+    public boolean getQueryRunning() {
+        return isQueryRunning;
+    }
+
+    public boolean getNewsRunning() {
+        return isNewsRunning;
     }
 
     public void sendNotification() {
@@ -60,12 +78,12 @@ public class StockQueryService extends Service {
     }
 
     public void startWebsiteQuery() {
-        isRunning = true;
-        timer = new Timer();
+        isQueryRunning = true;
+        queryTimer = new Timer();
 
         sendNotification();
         System.out.println("sent notif");
-        timer.scheduleAtFixedRate(new TimerTask() {
+        queryTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -89,8 +107,63 @@ public class StockQueryService extends Service {
     }
 
     public void stopWebsiteQuery() {
-        isRunning = false;
-        timer.cancel();
+        isQueryRunning = false;
+        queryTimer.cancel();
+        stopForeground(true);
+    }
+
+    public void startStockNewsQuery() {
+        isNewsRunning = true;
+        newsTimer = new Timer();
+
+        sendNotification();
+        System.out.println("sent notif");
+        newsTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("NEWS QUERY");
+                    URL url = new URL("https://static.newsfilter.io/landing-page/main-content-2.json");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        String inputLine;
+                        StringBuilder content = new StringBuilder();
+
+                        while ((inputLine = in.readLine()) != null) {
+                            content.append(inputLine);
+                        }
+                        in.close();
+                        String jsonData = content.toString();
+                        JSONArray jArray = new JSONArray(jsonData);
+                        for (int i = 0; i < jArray.length(); i++) {
+                            JSONObject element = jArray.getJSONObject(i);
+                            String title = element.getString("title").toLowerCase();
+                            String ticker = element.getString("symbols").toLowerCase();
+                                                                                            //for ticker length, why can't you do 0?
+                            if (Arrays.stream(keywordSetup).anyMatch(title::contains) && ticker.length() > 2 && !seen.contains(title)) {
+                                System.out.println(title + ticker);
+                                seen.add(title);
+                            }
+                        }
+                    } else {
+                        System.out.println("Failed to retrieve JSON data. Response Code: " + responseCode);
+                    }
+
+                    connection.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 3000); // Delay of 0 milliseconds and repeat every 3 seconds
+    }
+
+    public void stopStockNewsQuery() {
+        isNewsRunning = false;
+        newsTimer.cancel();
         stopForeground(true);
     }
 

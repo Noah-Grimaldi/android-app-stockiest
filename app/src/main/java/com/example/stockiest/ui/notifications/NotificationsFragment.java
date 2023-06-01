@@ -1,5 +1,7 @@
 package com.example.stockiest.ui.notifications;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -16,7 +18,9 @@ import com.example.stockiest.R;
 import com.example.stockiest.StockQueryService;
 import com.example.stockiest.databinding.FragmentNotificationsBinding;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class NotificationsFragment extends Fragment {
     private FragmentNotificationsBinding binding;
@@ -27,20 +31,19 @@ public class NotificationsFragment extends Fragment {
         View root = binding.getRoot();
 
         List<String> tickerBeatList = StockQueryService.getTickerBeats();
+        Set<String> tickerBeatSet = new HashSet<>(tickerBeatList);
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("stockBeatsAndNews", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet("dailyTickerBeats", tickerBeatSet);
+        editor.apply();
+
+        tickerBeatSet = sharedPreferences.getStringSet("ticker_beats", new HashSet<>());
+        System.out.println("What's saved: " + tickerBeatSet);
+
         TextView textView = new TextView(getActivity());
 
         if (tickerBeatList != null && !tickerBeatList.isEmpty()) {
-//            List<String> testing = new ArrayList<>(tickerBeatList.subList(0, 3));
-//            for (String i : testing) {
-//                TextView textView = new TextView(getActivity());
-//                textView.setText(i + " beat earnings!");
-//                textView.setTextSize(24);
-//                textView.setTextColor(Color.GREEN);
-//                textView.setGravity(Gravity.CENTER_HORIZONTAL);
-//                LinearLayout linearLayout = root.findViewById(R.id.parentLayout);
-//                linearLayout.addView(textView);
-//            }
-
 
             String text = tickerBeatList.get(0) + " beat earnings!\n" +
                           tickerBeatList.get(1) + " beat earnings!\n" +
