@@ -6,8 +6,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -16,6 +14,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,10 +35,9 @@ public class StockQueryService extends Service {
     private boolean isQueryRunning = false;
     private boolean isNewsRunning = false;
     private final String[] keywordSetup = {"phase clinical trial", "merge", " ipo ", "acquisition","nasdaq", "cancer", "cells", "partnership", "equity financing"," deal ","fda approval"," trial", "eps exceeded","contract award", "heart monitor", "pardon", "collaboration", "receives", "acquire", "funding recipients", "agreement", "alliance", "layoff"};
-    private final List<String> newsKeywords = Arrays.asList(keywordSetup);
-    private final CharSequence newsKeywordsSequence = TextUtils.join(", ", newsKeywords);
     List<String> seen = new ArrayList<>();
     public static final String CHANNEL_ID = "stockiest_service_channel";
+    private final String urlString = "https://static.newsfilter.io/landing-page/main-content-2.json";
 
     @Override
     public void onCreate() {
@@ -87,9 +86,28 @@ public class StockQueryService extends Service {
             @Override
             public void run() {
                 try {
+                    // delete this println when no longer needed
                     System.out.println("query made");
+
+                    // fetch html page
                     Document doc = Jsoup.connect("https://www.earningswhispers.com/calendar").get();
+                    // retrieve all classes of "ticker"
                     String tickers = doc.getElementsByClass("ticker").text();
+                    Elements companyNames = doc.getElementsByClass("company");
+                    StringBuilder resultBuilder = new StringBuilder();
+
+                    for (Element element : companyNames) {
+                        String companyName = element.text();
+                        resultBuilder.append(companyName).append(", ");
+                    }
+                    if (resultBuilder.length() > 0) {
+                        resultBuilder.setLength(resultBuilder.length() - 2);
+                    }
+
+                    String result = resultBuilder.toString();
+                    String[] companyArray = result.split(", ");
+                    System.out.println(Arrays.toString(companyArray));
+
                     List<String> tickerList = new ArrayList<>(Arrays.asList(tickers.split(" ")));
 
                     for (String i : tickerList) {
@@ -122,30 +140,41 @@ public class StockQueryService extends Service {
             @Override
             public void run() {
                 try {
+                    // delete this println when you no longer need it
                     System.out.println("NEWS QUERY");
-                    URL url = new URL("https://static.newsfilter.io/landing-page/main-content-2.json");
+
+                    // attempt to make connection to url
+                    URL url = new URL(urlString);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
-
                     int responseCode = connection.getResponseCode();
+
+                    // if successful
                     if (responseCode == HttpURLConnection.HTTP_OK) {
+                        // read response
                         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                         String inputLine;
                         StringBuilder content = new StringBuilder();
 
+                        // append to a string
                         while ((inputLine = in.readLine()) != null) {
                             content.append(inputLine);
                         }
                         in.close();
-                        String jsonData = content.toString();
-                        JSONArray jArray = new JSONArray(jsonData);
+
+                        // cast string result into an array of JSON Objects
+                        JSONArray jArray = new JSONArray(content.toString());
+
+                        // loop through array and parse necessary data
                         for (int i = 0; i < jArray.length(); i++) {
                             JSONObject element = jArray.getJSONObject(i);
                             String title = element.getString("title").toLowerCase();
                             String ticker = element.getString("symbols").toLowerCase();
-                                                                                            //for ticker length, why can't you do 0?
-                            if (Arrays.stream(keywordSetup).anyMatch(title::contains) && ticker.length() > 2 && !seen.contains(title)) {
-                                System.out.println(title + ticker);
+
+                            // check if current element matches keyword
+                            // only print to console if its new (hasn't been printed already)
+                            if (Arrays.stream(keywordSetup).anyMatch(title::contains) && ticker.length() > 0 && !seen.contains(title)) {
+                                System.out.println("[*] TITLE: " + title + "\n    TICKERS: " + ticker + "\n");
                                 seen.add(title);
                             }
                         }
