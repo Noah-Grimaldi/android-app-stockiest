@@ -38,7 +38,7 @@ public class NotificationsFragment extends Fragment {
         editor.putStringSet("dailyTickerBeats", tickerBeatSet);
         editor.apply();
 
-        tickerBeatSet = sharedPreferences.getStringSet("ticker_beats", new HashSet<>());
+        tickerBeatSet = sharedPreferences.getStringSet("dailyTickerBeats", new HashSet<>());
         System.out.println("What's saved: " + tickerBeatSet);
 
         TextView textView = new TextView(getActivity());
