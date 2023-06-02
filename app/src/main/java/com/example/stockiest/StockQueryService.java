@@ -6,8 +6,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -29,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StockQueryService extends Service {
     private Timer queryTimer;
@@ -39,8 +35,6 @@ public class StockQueryService extends Service {
     private boolean isQueryRunning = false;
     private boolean isNewsRunning = false;
     private final String[] keywordSetup = {"phase clinical trial", "merge", " ipo ", "acquisition","nasdaq", "cancer", "cells", "partnership", "equity financing"," deal ","fda approval"," trial", "eps exceeded","contract award", "heart monitor", "pardon", "collaboration", "receives", "acquire", "funding recipients", "agreement", "alliance", "layoff"};
-    private final List<String> newsKeywords = Arrays.asList(keywordSetup);
-    private final CharSequence newsKeywordsSequence = TextUtils.join(", ", newsKeywords);
     List<String> seen = new ArrayList<>();
     public static final String CHANNEL_ID = "stockiest_service_channel";
     private final String urlString = "https://static.newsfilter.io/landing-page/main-content-2.json";
@@ -111,7 +105,6 @@ public class StockQueryService extends Service {
                     }
 
                     String result = resultBuilder.toString();
-                    System.out.println(result);
                     String[] companyArray = result.split(", ");
                     System.out.println(Arrays.toString(companyArray));
 
