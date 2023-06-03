@@ -25,51 +25,58 @@ import java.util.Set;
 public class NotificationsFragment extends Fragment {
     private FragmentNotificationsBinding binding;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        List<String> tickerBeatList = StockQueryService.getTickerBeats();
-        Set<String> tickerBeatSet = new HashSet<>(tickerBeatList);
-
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("stockBeatsAndNews", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet("dailyTickerBeats", tickerBeatSet);
-        editor.apply();
-
-        tickerBeatSet = sharedPreferences.getStringSet("dailyTickerBeats", new HashSet<>());
-        System.out.println("What's saved: " + tickerBeatSet);
-
-        TextView textView = new TextView(getActivity());
-
-        if (tickerBeatList != null && !tickerBeatList.isEmpty()) {
-
-            String text = tickerBeatList.get(0) + " beat earnings!\n" +
-                          tickerBeatList.get(1) + " beat earnings!\n" +
-                          tickerBeatList.get(2) + " beat earnings!\n";
-
-            textView.setText(text);
-            textView.setTextSize(24);
-            textView.setTextColor(Color.GREEN);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            LinearLayout linearLayout = root.findViewById(R.id.parentLayout);
-            linearLayout.addView(textView);
-        }
-        else {
-            textView.setText("None");
-            textView.setTextSize(24);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            LinearLayout linearLayout = root.findViewById(R.id.parentLayout);
-            linearLayout.addView(textView);
-        }
+        setup();
 
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setup();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    public void setup() {
+        // get ticker beats list
+        List<String> tickerBeatList = StockQueryService.getTickerBeats();
+
+        // get headlines
+        List<String> headlines = StockQueryService.getHeadlines();
+
+        TextView textView = new TextView(getActivity());
+
+        TextView headlinesTextView = binding.getRoot().findViewById((R.id.headlines_textview));
+        //headlinesTextView.setText("test\ntest2\ntest3");
+
+        if (tickerBeatList != null && !tickerBeatList.isEmpty()) {
+
+            String text = tickerBeatList.get(0) + " beat earnings!\n" +
+                    tickerBeatList.get(1) + " beat earnings!\n" +
+                    tickerBeatList.get(2) + " beat earnings!\n";
+
+            textView.setText(text);
+            textView.setTextSize(24);
+            textView.setTextColor(Color.GREEN);
+            textView.setGravity(Gravity.CENTER_HORIZONTAL);
+            //LinearLayout linearLayout = binding.getRoot().findViewById(R.id.parentLayout);
+            //linearLayout.addView(textView);
+        }
+        else {
+            textView.setText("None");
+            textView.setTextSize(24);
+            textView.setGravity(Gravity.CENTER_HORIZONTAL);
+//            LinearLayout linearLayout = binding.getRoot().findViewById(R.id.parentLayout);
+//            linearLayout.addView(textView);
+        }
     }
 }

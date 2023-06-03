@@ -32,6 +32,7 @@ public class StockQueryService extends Service {
     private Timer queryTimer;
     private Timer newsTimer;
     private static List<String> tickerBeats = new ArrayList<>();
+    private static List<String> headlines = new ArrayList<>();
     private boolean isQueryRunning = false;
     private boolean isNewsRunning = false;
     private final String[] keywordSetup = {"phase clinical trial", "merge", " ipo ", "acquisition","nasdaq", "cancer", "cells", "partnership", "equity financing"," deal ","fda approval"," trial", "eps exceeded","contract award", "heart monitor", "pardon", "collaboration", "receives", "acquire", "funding recipients", "agreement", "alliance", "layoff"};
@@ -176,6 +177,7 @@ public class StockQueryService extends Service {
                             if (Arrays.stream(keywordSetup).anyMatch(title::contains) && ticker.length() > 0 && !seen.contains(title)) {
                                 System.out.println("[*] TITLE: " + title + "\n    TICKERS: " + ticker + "\n");
                                 seen.add(title);
+                                headlines.add(title + ticker);
                             }
                         }
                     } else {
@@ -198,6 +200,10 @@ public class StockQueryService extends Service {
 
     public static List<String> getTickerBeats() {
         return tickerBeats;
+    }
+
+    public static List<String> getHeadlines() {
+        return headlines;
     }
 
     public class StockQueryServiceBinder extends Binder {
