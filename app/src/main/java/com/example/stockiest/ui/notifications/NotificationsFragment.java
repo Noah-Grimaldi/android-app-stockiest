@@ -1,14 +1,11 @@
 package com.example.stockiest.ui.notifications;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,9 +15,7 @@ import com.example.stockiest.R;
 import com.example.stockiest.StockQueryService;
 import com.example.stockiest.databinding.FragmentNotificationsBinding;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class NotificationsFragment extends Fragment {
     private FragmentNotificationsBinding binding;
@@ -53,10 +48,8 @@ public class NotificationsFragment extends Fragment {
         // get headlines
         List<String> headlines = StockQueryService.getHeadlines();
 
-        TextView textView = new TextView(getActivity());
-
-        TextView headlinesTextView = binding.getRoot().findViewById((R.id.headlines_textview));
-        //headlinesTextView.setText("test\ntest2\ntest3");
+        TextView headlinesTextView = binding.getRoot().findViewById((R.id.textViewHeadlines));
+        headlinesTextView.setText("test\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\n");
 
         if (tickerBeatList != null && !tickerBeatList.isEmpty()) {
 
@@ -64,19 +57,15 @@ public class NotificationsFragment extends Fragment {
                     tickerBeatList.get(1) + " beat earnings!\n" +
                     tickerBeatList.get(2) + " beat earnings!\n";
 
-            textView.setText(text);
-            textView.setTextSize(24);
-            textView.setTextColor(Color.GREEN);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            //LinearLayout linearLayout = binding.getRoot().findViewById(R.id.parentLayout);
-            //linearLayout.addView(textView);
+//            textView.setText(text);
+//            textView.setTextSize(24);
+//            textView.setTextColor(Color.GREEN);
+//            textView.setGravity(Gravity.CENTER_HORIZONTAL);
         }
         else {
-            textView.setText("None");
-            textView.setTextSize(24);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-//            LinearLayout linearLayout = binding.getRoot().findViewById(R.id.parentLayout);
-//            linearLayout.addView(textView);
+//            textView.setText("None");
+//            textView.setTextSize(24);
+//            textView.setGravity(Gravity.CENTER_HORIZONTAL);
         }
     }
 }

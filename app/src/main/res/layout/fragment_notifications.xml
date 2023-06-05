@@ -7,40 +7,69 @@
     tools:context=".ui.notifications.NotificationsFragment">
 
     <TextView
-        android:id="@+id/title_label"
-        android:layout_width="125dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="21dp"
-        android:layout_marginTop="33dp"
-        android:layout_marginEnd="289dp"
-        android:layout_marginBottom="724dp"
-        android:text="Notifications"
+        android:id="@+id/title_label2"
+        android:layout_width="153dp"
+        android:layout_height="33dp"
+        android:text="Beats"
+        android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/scrollViewBeats"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.062"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/scrollViewHeadlines"
+        app:layout_constraintVertical_bias="0.755" />
+
+    <TextView
+        android:id="@+id/title_label"
+        android:layout_width="160dp"
+        android:layout_height="31dp"
+        android:text="Headlines"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/scrollViewHeadlines"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.035"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.32" />
 
     <ScrollView
-        android:id="@+id/scrollView2"
+        android:id="@+id/scrollViewHeadlines"
         android:layout_width="349dp"
         android:layout_height="237dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="85dp"
-        android:layout_marginEnd="54dp"
-        android:layout_marginBottom="467dp"
+        android:background="#40191616"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.095">
 
         <TextView
-            android:id="@+id/headlines_textview"
+            android:id="@+id/textViewHeadlines"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:layout_height="wrap_content" />
     </ScrollView>
+
+    <ScrollView
+        android:id="@+id/scrollViewBeats"
+        android:layout_width="349dp"
+        android:layout_height="249dp"
+        android:background="#40191616"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollViewHeadlines"
+        app:layout_constraintVertical_bias="0.396">
+
+        <TextView
+            android:id="@+id/textViewBeats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 
