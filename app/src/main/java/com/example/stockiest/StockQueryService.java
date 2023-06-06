@@ -80,7 +80,7 @@ public class StockQueryService extends Service {
     public void startWebsiteQuery() {
         isQueryRunning = true;
         queryTimer = new Timer();
-
+//.\emulator.exe -avd avd_device_name -dns-server 8.8.8.8
         sendNotification();
         System.out.println("sent notif");
         queryTimer.scheduleAtFixedRate(new TimerTask() {

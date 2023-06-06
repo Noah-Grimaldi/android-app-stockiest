@@ -15,16 +15,30 @@ import com.example.stockiest.R;
 import com.example.stockiest.StockQueryService;
 import com.example.stockiest.databinding.FragmentNotificationsBinding;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NotificationsFragment extends Fragment {
     private FragmentNotificationsBinding binding;
+    private Timer consumeTimer;
+    private List<String> tickerBeatList;
+    private List<String> headlines;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        setup();
+        //setup();
+        //consume();
 
         return root;
     }
@@ -33,39 +47,59 @@ public class NotificationsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         setup();
+        consume();
     }
 
     @Override
     public void onDestroyView() {
+        stopConsume();
         super.onDestroyView();
         binding = null;
     }
 
     public void setup() {
         // get ticker beats list
-        List<String> tickerBeatList = StockQueryService.getTickerBeats();
+        tickerBeatList = StockQueryService.getTickerBeats();
 
         // get headlines
-        List<String> headlines = StockQueryService.getHeadlines();
+        headlines = StockQueryService.getHeadlines();
 
         TextView headlinesTextView = binding.getRoot().findViewById((R.id.textViewHeadlines));
-        headlinesTextView.setText("test\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\ntest\ntest2\ntest3\n");
+        TextView beatsTextView = binding.getRoot().findViewById((R.id.textViewBeats));
 
-        if (tickerBeatList != null && !tickerBeatList.isEmpty()) {
-
-            String text = tickerBeatList.get(0) + " beat earnings!\n" +
-                    tickerBeatList.get(1) + " beat earnings!\n" +
-                    tickerBeatList.get(2) + " beat earnings!\n";
-
-//            textView.setText(text);
-//            textView.setTextSize(24);
-//            textView.setTextColor(Color.GREEN);
-//            textView.setGravity(Gravity.CENTER_HORIZONTAL);
+        if (headlines.size() > 0) {
+            // loop over arrays and display values
+            for (String headline : headlines) {
+                headlinesTextView.append(headline + "\n");
+            }
         }
-        else {
-//            textView.setText("None");
-//            textView.setTextSize(24);
-//            textView.setGravity(Gravity.CENTER_HORIZONTAL);
+
+        if (tickerBeatList.size() > 0) {
+            // loop over arrays and display values
+            for (String beat : tickerBeatList) {
+                beatsTextView.append(beat + "\n");
+            }
         }
+    }
+
+    public void consume() {
+        consumeTimer = new Timer();
+
+        consumeTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("consuming...");
+                    setup();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 3000);
+    }
+
+    public void stopConsume() {
+        System.out.println("stopped consuming.");
+        consumeTimer.cancel();
     }
 }
