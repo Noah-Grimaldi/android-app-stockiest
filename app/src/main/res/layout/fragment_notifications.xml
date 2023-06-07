@@ -1,28 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.notifications.NotificationsFragment">
 
-    <LinearLayout
-        android:id="@+id/parentLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <TextView
+        android:id="@+id/title_label2"
+        android:layout_width="153dp"
+        android:layout_height="33dp"
+        android:text="Earnings Beat"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/scrollViewBeats"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.062"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollViewHeadlines"
+        app:layout_constraintVertical_bias="0.755" />
+
+    <TextView
+        android:id="@+id/title_label"
+        android:layout_width="210dp"
+        android:layout_height="28dp"
+        android:text="Stock News Headlines"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/scrollViewHeadlines"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.035"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.32" />
+
+    <ScrollView
+        android:id="@+id/scrollViewHeadlines"
+        android:layout_width="349dp"
+        android:layout_height="237dp"
+        android:background="#40191616"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.095">
 
         <TextView
-            android:id="@+id/textNotifications"
-            android:layout_width="wrap_content"
+            android:id="@+id/textViewHeadlines"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Notifications"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@android:color/black"
-            android:layout_margin="16dp"/>
+            android:lineSpacingExtra="8sp"
+            android:textColor="#000000"
+            android:textSize="16sp" />
+    </ScrollView>
 
-    </LinearLayout>
+    <ScrollView
+        android:id="@+id/scrollViewBeats"
+        android:layout_width="349dp"
+        android:layout_height="249dp"
+        android:background="#40191616"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollViewHeadlines"
+        app:layout_constraintVertical_bias="0.396">
+
+        <TextView
+            android:id="@+id/textViewBeats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="8sp"
+            android:textColor="#32AA09"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -32,10 +32,12 @@ public class StockQueryService extends Service {
     private Timer queryTimer;
     private Timer newsTimer;
     private static List<String> tickerBeats = new ArrayList<>();
+    private static List<String> headlines = new ArrayList<>();
     private boolean isQueryRunning = false;
     private boolean isNewsRunning = false;
     private final String[] keywordSetup = {"phase clinical trial", "merge", " ipo ", "acquisition","nasdaq", "cancer", "cells", "partnership", "equity financing"," deal ","fda approval"," trial", "eps exceeded","contract award", "heart monitor", "pardon", "collaboration", "receives", "acquire", "funding recipients", "agreement", "alliance", "layoff"};
-    List<String> seen = new ArrayList<>();
+    List<String> seenHeadlines = new ArrayList<>();
+    List<String> seenBeats = new ArrayList<>();
     public static final String CHANNEL_ID = "stockiest_service_channel";
     private final String urlString = "https://static.newsfilter.io/landing-page/main-content-2.json";
 
@@ -81,14 +83,11 @@ public class StockQueryService extends Service {
         queryTimer = new Timer();
 
         sendNotification();
-        System.out.println("sent notif");
+
         queryTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
-                    // delete this println when no longer needed
-                    System.out.println("query made");
-
                     // fetch html page
                     Document doc = Jsoup.connect("https://www.earningswhispers.com/calendar").get();
                     // retrieve all classes of "ticker"
@@ -113,8 +112,9 @@ public class StockQueryService extends Service {
                     for (String i : tickerList) {
                         String tickerClass = String.format("T-%s", i);
                         String tickerID = String.valueOf(doc.getElementById(tickerClass));
-                        if (tickerID.contains("class=\"actual green") && tickerID.contains("class=\"revactual green")) {
-                            tickerBeats.add(i);
+                        if (tickerID.contains("class=\"actual green") && tickerID.contains("class=\"revactual green") && !seenBeats.contains(i)) {
+                            tickerBeats.add(0, "[+] " + i + "\n");
+                            seenBeats.add(i);
                         }
                     }
                 } catch (IOException e) {
@@ -173,9 +173,10 @@ public class StockQueryService extends Service {
 
                             // check if current element matches keyword
                             // only print to console if its new (hasn't been printed already)
-                            if (Arrays.stream(keywordSetup).anyMatch(title::contains) && ticker.length() > 0 && !seen.contains(title)) {
+                            if (Arrays.stream(keywordSetup).anyMatch(title::contains) && ticker.length() > 0 && !seenHeadlines.contains(title)) {
                                 System.out.println("[*] TITLE: " + title + "\n    TICKERS: " + ticker + "\n");
-                                seen.add(title);
+                                seenHeadlines.add(title);
+                                headlines.add(0, "[*] TITLE: " + title + "\n    TICKER(S): " + ticker + "\n");
                             }
                         }
                     } else {
@@ -198,6 +199,10 @@ public class StockQueryService extends Service {
 
     public static List<String> getTickerBeats() {
         return tickerBeats;
+    }
+
+    public static List<String> getHeadlines() {
+        return headlines;
     }
 
     public class StockQueryServiceBinder extends Binder {
