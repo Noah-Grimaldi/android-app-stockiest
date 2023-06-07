@@ -93,28 +93,24 @@ public class StockQueryService extends Service {
                     // retrieve all classes of "ticker"
                     String tickers = doc.getElementsByClass("ticker").text();
                     Elements companyNames = doc.getElementsByClass("company");
-                    StringBuilder resultBuilder = new StringBuilder();
+                    List<String> companyResults = new ArrayList<>();
 
                     for (Element element : companyNames) {
                         String companyName = element.text();
-                        resultBuilder.append(companyName).append(", ");
-                    }
-                    if (resultBuilder.length() > 0) {
-                        resultBuilder.setLength(resultBuilder.length() - 2);
+                        companyResults.add(companyName);
                     }
 
-                    String result = resultBuilder.toString();
-                    String[] companyArray = result.split(", ");
-                    System.out.println(Arrays.toString(companyArray));
+                    System.out.println(companyResults.toString());
 
                     List<String> tickerList = new ArrayList<>(Arrays.asList(tickers.split(" ")));
 
-                    for (String i : tickerList) {
-                        String tickerClass = String.format("T-%s", i);
+                    for (int i = 0; i < tickerList.size(); i++) {
+                        String tickerClass = String.format("T-%s", tickerList.get(i));
                         String tickerID = String.valueOf(doc.getElementById(tickerClass));
-                        if (tickerID.contains("class=\"actual green") && tickerID.contains("class=\"revactual green") && !seenBeats.contains(i)) {
-                            tickerBeats.add(0, "[+] " + i + "\n");
-                            seenBeats.add(i);
+                        if (tickerID.contains("class=\"actual green") && tickerID.contains("class=\"revactual green") && !seenBeats.contains(tickerList.get(i))) {
+                            //Add name here as well (companyArray)
+                            tickerBeats.add(0, "[+] " + tickerList.get(i) + " - " + companyResults.get(i) + "\n");
+                            seenBeats.add(tickerList.get(i));
                         }
                     }
                 } catch (IOException e) {
