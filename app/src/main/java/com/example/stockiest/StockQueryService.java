@@ -64,13 +64,13 @@ public class StockQueryService extends Service {
         return isNewsRunning;
     }
 
-    public void sendNotification() {
+    public void sendNotification(String textTitle, String textContent) {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Stockiest Service")
-                .setContentText("Stockiest service is running in the background.")
+                .setContentTitle(textTitle)
+                .setContentText(textContent)
                 .setSmallIcon(R.drawable.stockiesticon)
                 .setContentIntent(pendingIntent)
                 .build();
@@ -82,12 +82,13 @@ public class StockQueryService extends Service {
         isQueryRunning = true;
         queryTimer = new Timer();
 
-        sendNotification();
+        sendNotification("Stockiest Service", "Stockiest service is running in the background.");
 
         queryTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
+                    boolean isWebNotiRunning = MainActivity.notificationRunner;
                     // fetch html page
                     Document doc = Jsoup.connect("https://www.earningswhispers.com/calendar").get();
                     // retrieve all classes of "ticker"
@@ -100,7 +101,7 @@ public class StockQueryService extends Service {
                         companyResults.add(companyName);
                     }
 
-                    System.out.println(companyResults.toString());
+                    System.out.println(companyResults);
 
                     List<String> tickerList = new ArrayList<>(Arrays.asList(tickers.split(" ")));
 
@@ -111,6 +112,11 @@ public class StockQueryService extends Service {
                             //Add name here as well (companyArray)
                             tickerBeats.add(0, "[+] " + tickerList.get(i) + " - " + companyResults.get(i) + "\n");
                             seenBeats.add(tickerList.get(i));
+                            if (isWebNotiRunning) {
+                                System.out.println("I believe it worked, yay!");
+                                // *IMPORTANT* - Be sure to change the tickerList to only contain non repeats
+                                sendNotification("Stock News", tickerList.get(i) + " beat their earnings report!");
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -130,15 +136,15 @@ public class StockQueryService extends Service {
         isNewsRunning = true;
         newsTimer = new Timer();
 
-        sendNotification();
+        sendNotification("Stockiest Service","Stockiest service is running in the background.");
         System.out.println("sent notif");
         newsTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
+                    boolean isNewsNotiRunning = MainActivity.notificationRunner;
                     // delete this println when you no longer need it
                     System.out.println("NEWS QUERY");
-
                     // attempt to make connection to url
                     URL url = new URL(urlString);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -173,6 +179,10 @@ public class StockQueryService extends Service {
                                 System.out.println("[*] TITLE: " + title + "\n    TICKERS: " + ticker + "\n");
                                 seenHeadlines.add(title);
                                 headlines.add(0, "[*] TITLE: " + title + "\n    TICKER(S): " + ticker + "\n");
+                                if (isNewsNotiRunning) {
+                                    System.out.println("News Noti");
+                                    sendNotification("Stock News", ticker + "has some important news!");
+                                }
                             }
                         }
                     } else {

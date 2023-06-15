@@ -30,6 +30,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.stockiest.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
+    static boolean notificationRunner;
     public static final String CHANNEL_ID = "stockiest_service_channel";
     public static final String CHANNEL_NAME = "My Background Service";
     private StockQueryService stockQueryService;
@@ -156,6 +157,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(serviceConnection);
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        System.out.println("PAUSED");
+        notificationRunner = true;
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("RESUMED!");
+        notificationRunner = false;
     }
 
     /**
