@@ -7,7 +7,7 @@ Minimized Java Source code for my news and earnings report filter android app, "
 </a>
 
 # Cross Platform? (Windows/Mac/Linux)
-For more detailed Python source code platform independent you can go to [this repository](https://github.com/Noah-Grimaldi/stockiest-stock-news-scanner).
+For more detailed Python source code that is platform independent you can go to [this repository](https://github.com/Noah-Grimaldi/stockiest-stock-news-scanner).
 
 # Details
 This source code is simply for display purposes, it was made fully in Java on Android Studio
