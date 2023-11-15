@@ -1,4 +1,4 @@
-# android-app-stockiest
+# Stockiest Source Code
 Minimized Java Source code for my news and earnings report filter android app, "Stockiest."
 
 # Download Stockiest
